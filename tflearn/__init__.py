@@ -1,5 +1,6 @@
 from __future__ import absolute_import
-
+# Collections
+from .collections import CollectionKeys
 # Config
 from . import config
 from .config import is_training, get_training_mode, init_graph
@@ -28,7 +29,6 @@ from . import optimizers
 from . import summaries
 from . import optimizers
 from . import variables
-from . import collections # Add TFLearn collections to Tensorflow GraphKeys
 
 # Direct ops inclusion
 from .optimizers import SGD, AdaGrad, Adam, RMSProp, Momentum, Ftrl, AdaDelta, \
@@ -55,6 +55,8 @@ from .layers.normalization import batch_normalization, local_response_normalizat
 from .layers.estimator import regression
 from .layers.recurrent import lstm, gru, simple_rnn, bidirectional_rnn, \
     BasicRNNCell, BasicLSTMCell, GRUCell
+from .layers.rnn import lstm as tf_lstm, gru as tf_gru, simple_rnn as tf_simple_rnn, rnn as tf_rnn, \
+    bidirectional_rnn as tf_bidirectional_rnn, coupled_input_forget_gate_lstm
 from .layers.embedding_ops import embedding
 from .layers.merge_ops import merge, merge_outputs
 

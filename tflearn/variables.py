@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function, absolute_import
 
+from .collections import CollectionKeys
 import tensorflow as tf
 import tflearn
 
@@ -52,20 +53,19 @@ def variable(name, shape=None, dtype=tf.float32, initializer=None,
         regularizer = tflearn.losses.get(regularizer)
 
     collections = set(collections or [])
-    collections |= set([ops.GraphKeys.GLOBAL_VARIABLES,
-                        ops.GraphKeys.MODEL_VARIABLES])
+    collections |= {ops.GraphKeys.GLOBAL_VARIABLES, ops.GraphKeys.MODEL_VARIABLES}
 
     with ops.device(device or ''):
         var = variable_scope.get_variable(name, shape=shape, dtype=dtype,
-                                           initializer=initializer,
-                                           regularizer=regularizer,
-                                           trainable=trainable,
-                                           collections=collections,
-                                           caching_device=caching_device,
-                                           validate_shape=validate_shape)
+                                          initializer=initializer,
+                                          regularizer=regularizer,
+                                          trainable=trainable,
+                                          collections=collections,
+                                          caching_device=caching_device,
+                                          validate_shape=validate_shape)
 
     if not restore:
-        tf.add_to_collection(tf.GraphKeys.EXCL_RESTORE_VARS, var)
+        tf.add_to_collection(CollectionKeys.EXCL_RESTORE_VARS, var)
 
     return var
 
@@ -109,7 +109,8 @@ def get_layer_variables_by_name(name):
         A list of Variables.
 
     """
-    return tf.get_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name)
+    return tf.get_collection(CollectionKeys.LAYER_VARIABLES + '/' + name)
+
 
 # Shortcut
 get_layer_variables = get_layer_variables_by_name
@@ -161,10 +162,10 @@ def set_value(var, value, session=None):
 
 
 def get_inputs_placeholder_by_name(name):
-    vars = tf.get_collection(tf.GraphKeys.INPUTS)
+    vars = tf.get_collection(CollectionKeys.INPUTS)
     tflearn_name = name + '/X:0'
     if len(vars) == 0:
-        raise Exception("The collection `tf.GraphKeys.INPUTS` is empty! "
+        raise Exception("The collection `CollectionKeys.INPUTS` is empty! "
                         "Cannot retrieve placeholder. In case placeholder was "
                         "defined outside TFLearn `input_data` layer, please "
                         "add it to that collection.")
@@ -180,10 +181,10 @@ def get_inputs_placeholder_by_name(name):
 
 
 def get_targets_placeholder_by_name(name):
-    vars = tf.get_collection(tf.GraphKeys.TARGETS)
+    vars = tf.get_collection(CollectionKeys.TARGETS)
     tflearn_name = name + '/Y:0'
     if len(vars) == 0:
-        raise Exception("The collection `tf.GraphKeys.INPUTS` is empty! "
+        raise Exception("The collection `CollectionKeys.INPUTS` is empty! "
                         "Cannot retrieve placeholder. In case placeholder was "
                         "defined outside TFLearn `input_data` layer, please "
                         "add it to that collection.")
@@ -192,7 +193,7 @@ def get_targets_placeholder_by_name(name):
             return e
     # Search again, in case defined outside TFLearn wrappers.
     for e in vars:
-        if e.name == name+':0':
+        if e.name == name + ':0':
             return e
 
     return None

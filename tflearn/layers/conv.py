@@ -2,6 +2,7 @@
 from __future__ import division, print_function, absolute_import
 
 import tensorflow as tf
+from ..collections import CollectionKeys
 import numpy as np
 from math import ceil
 
@@ -87,7 +88,7 @@ def conv_2d(incoming, nb_filter, filter_size, strides=1, padding='same',
                         restore=restore)
 
         # Track per layer variables
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
 
         b = None
         if bias:
@@ -99,7 +100,7 @@ def conv_2d(incoming, nb_filter, filter_size, strides=1, padding='same',
             b = vs.variable('b', shape=b_shape, initializer=bias_init,
                             trainable=trainable, restore=restore)
             # Track per layer variables
-            tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b)
+            tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b)
 
         inference = tf.nn.conv2d(incoming, W, strides, padding)
         if b is not None: inference = tf.nn.bias_add(inference, b)
@@ -121,7 +122,7 @@ def conv_2d(incoming, nb_filter, filter_size, strides=1, padding='same',
     inference.b = b
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -209,7 +210,7 @@ def conv_2d_transpose(incoming, nb_filter, filter_size, output_shape,
                         regularizer=W_regul, initializer=W_init,
                         trainable=trainable, restore=restore)
         # Track per layer variables
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
 
         b = None
         if bias:
@@ -221,7 +222,7 @@ def conv_2d_transpose(incoming, nb_filter, filter_size, output_shape,
             b = vs.variable('b', shape=b_shape, initializer=bias_init,
                             trainable=trainable, restore=restore)
             # Track per layer variables
-            tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b)
+            tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b)
 
         # Determine the complete shape of the output tensor.
         batch_size = tf.gather(tf.shape(incoming), tf.constant([0]))
@@ -257,7 +258,7 @@ def conv_2d_transpose(incoming, nb_filter, filter_size, output_shape,
     inference.b = b
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -364,7 +365,7 @@ def atrous_conv_2d(incoming, nb_filter, filter_size, rate=1, padding='same',
                         restore=restore)
 
         # Track per layer variables
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
 
         b = None
         if bias:
@@ -376,7 +377,7 @@ def atrous_conv_2d(incoming, nb_filter, filter_size, rate=1, padding='same',
             b = vs.variable('b', shape=b_shape, initializer=bias_init,
                             trainable=trainable, restore=restore)
             # Track per layer variables
-            tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b)
+            tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b)
 
         inference = tf.nn.atrous_conv2d(incoming, W, rate, padding)
         if b is not None: inference = tf.nn.bias_add(inference, b)
@@ -398,7 +399,7 @@ def atrous_conv_2d(incoming, nb_filter, filter_size, rate=1, padding='same',
     inference.b = b
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -499,7 +500,7 @@ def grouped_conv_2d(incoming, channel_multiplier, filter_size, strides=1,
                         restore=restore)
 
         # Track per layer variables
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
 
         b = None
         if bias:
@@ -511,7 +512,7 @@ def grouped_conv_2d(incoming, channel_multiplier, filter_size, strides=1,
             b = vs.variable('b', shape=b_shape, initializer=bias_init,
                             trainable=trainable, restore=restore)
             # Track per layer variables
-            tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b)
+            tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b)
 
         inference = tf.nn.depthwise_conv2d(incoming, W, strides, padding)
         if b is not None: inference = tf.nn.bias_add(inference, b)
@@ -533,7 +534,7 @@ def grouped_conv_2d(incoming, channel_multiplier, filter_size, strides=1,
     inference.b = b
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -578,7 +579,7 @@ def max_pool_2d(incoming, kernel_size, strides=None, padding='same',
     inference.scope = scope
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -623,7 +624,7 @@ def avg_pool_2d(incoming, kernel_size, strides=None, padding='same',
     inference.scope = scope
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -660,7 +661,7 @@ def upsample_2d(incoming, kernel_size, name="UpSample2D"):
     inference.scope = scope
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -755,7 +756,7 @@ def upscore_layer(incoming, num_classes, shape=None, kernel_size=4,
             W = vs.variable(name="up_filter", initializer=init,
                             shape=weights.shape, trainable=trainable,
                             restore=restore)
-            tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+            tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
             return W
 
         weights = get_deconv_filter(filter_size)
@@ -765,7 +766,7 @@ def upscore_layer(incoming, num_classes, shape=None, kernel_size=4,
     deconv.scope = scope
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, deconv)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, deconv)
 
     return deconv
 
@@ -865,7 +866,7 @@ def upscore_layer3d(incoming, num_classes, shape=None, kernel_size=4,
             W = vs.variable(name="up_filter", initializer=init,
                             shape=weights.shape, trainable=trainable,
                             restore=restore)
-            tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+            tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
             return W
 
         weights = get_deconv_filter(filter_size)
@@ -875,7 +876,7 @@ def upscore_layer3d(incoming, num_classes, shape=None, kernel_size=4,
     deconv.scope = scope
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, deconv)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, deconv)
 
     return deconv
 
@@ -956,7 +957,7 @@ def conv_1d(incoming, nb_filter, filter_size, strides=1, padding='same',
                         initializer=W_init, trainable=trainable,
                         restore=restore)
         # Track per layer variables
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
 
         b = None
         if bias:
@@ -968,7 +969,7 @@ def conv_1d(incoming, nb_filter, filter_size, strides=1, padding='same',
             b = vs.variable('b', shape=b_shape, initializer=bias_init,
                             trainable=trainable, restore=restore)
             # Track per layer variables
-            tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b)
+            tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b)
 
         # Adding dummy dimension to fit with Tensorflow conv2d
         inference = tf.expand_dims(incoming, 2)
@@ -992,7 +993,7 @@ def conv_1d(incoming, nb_filter, filter_size, strides=1, padding='same',
     inference.b = b
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -1041,7 +1042,7 @@ def max_pool_1d(incoming, kernel_size, strides=None, padding='same',
     inference.scope = scope
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -1089,7 +1090,7 @@ def avg_pool_1d(incoming, kernel_size, strides=None, padding='same',
     inference.scope = scope
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -1166,7 +1167,7 @@ def conv_3d(incoming, nb_filter, filter_size, strides=1, padding='same',
                         initializer=W_init, trainable=trainable,
                         restore=restore)
         # Track per layer variables
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
 
         b = None
         if bias:
@@ -1178,7 +1179,7 @@ def conv_3d(incoming, nb_filter, filter_size, strides=1, padding='same',
             b = vs.variable('b', shape=b_shape, initializer=bias_init,
                             trainable=trainable, restore=restore)
             # Track per layer variables
-            tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b)
+            tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b)
 
         inference = tf.nn.conv3d(incoming, W, strides, padding)
         if b is not None: inference = tf.nn.bias_add(inference, b)
@@ -1199,7 +1200,7 @@ def conv_3d(incoming, nb_filter, filter_size, strides=1, padding='same',
     inference.b = b
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -1288,7 +1289,7 @@ def conv_3d_transpose(incoming, nb_filter, filter_size, output_shape,
                         regularizer=W_regul, initializer=W_init,
                         trainable=trainable, restore=restore)
         # Track per layer variables
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
 
         b = None
         if bias:
@@ -1300,7 +1301,7 @@ def conv_3d_transpose(incoming, nb_filter, filter_size, output_shape,
             b = vs.variable('b', shape=b_shape, initializer=bias_init,
                             trainable=trainable, restore=restore)
             # Track per layer variables
-            tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b)
+            tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b)
 
         # Determine the complete shape of the output tensor.
         batch_size = tf.gather(tf.shape(incoming), tf.constant([0]))
@@ -1336,7 +1337,7 @@ def conv_3d_transpose(incoming, nb_filter, filter_size, output_shape,
     inference.b = b
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -1382,7 +1383,7 @@ def max_pool_3d(incoming, kernel_size, strides=1, padding='same',
     inference.scope = scope
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -1429,7 +1430,7 @@ def avg_pool_3d(incoming, kernel_size, strides=1, padding='same',
     inference.scope = scope
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -1455,7 +1456,7 @@ def global_max_pool(incoming, name="GlobalMaxPool"):
         inference = tf.reduce_max(incoming, [1, 2])
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -1481,7 +1482,7 @@ def global_avg_pool(incoming, name="GlobalAvgPool"):
         inference = tf.reduce_mean(incoming, [1, 2])
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -2038,25 +2039,25 @@ def highway_conv_2d(incoming, nb_filter, filter_size, strides=1, padding='same',
                         initializer=W_init, trainable=trainable,
                         restore=restore)
         # Track per layer variables
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
 
         bias_init = initializations.get(bias_init)()
         b = vs.variable('b', shape=nb_filter, initializer=bias_init,
                         trainable=trainable, restore=restore)
         # Track per layer variables
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b)
 
         # Weight and bias for the transform gate
         W_T = vs.variable('W_T', shape=nb_filter,
                           regularizer=None, initializer=W_init,
                           trainable=trainable, restore=restore)
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' +
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' +
                              name, W_T)
 
         b_T = vs.variable('b_T', shape=nb_filter,
                           initializer=tf.constant_initializer(-3),
                           trainable=trainable, restore=restore)
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' +
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' +
                              name, b_T)
 
         if isinstance(activation, str):
@@ -2084,7 +2085,7 @@ def highway_conv_2d(incoming, nb_filter, filter_size, strides=1, padding='same',
     inference.b_T = b_T
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -2167,24 +2168,24 @@ def highway_conv_1d(incoming, nb_filter, filter_size, strides=1, padding='same',
                         regularizer=W_regul, initializer=W_init,
                         trainable=trainable, restore=restore)
         # Track per layer variables
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
 
         bias_init = initializations.get(bias_init)()
         b = vs.variable('b', shape=nb_filter, initializer=bias_init,
                         trainable=trainable, restore=restore)
         # Track per layer variables
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b)
 
         # Weight and bias for the transform gate
         W_T = vs.variable('W_T', shape=nb_filter,
                         regularizer=None, initializer=W_init,
                         trainable=trainable, restore=restore)
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W_T)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W_T)
 
         b_T = vs.variable('b_T', shape=nb_filter,
                           initializer=tf.constant_initializer(-3),
                           trainable=trainable, restore=restore)
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b_T)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b_T)
 
         if isinstance(activation, str):
             activation = activations.get(activation)
@@ -2215,6 +2216,6 @@ def highway_conv_1d(incoming, nb_filter, filter_size, strides=1, padding='same',
     inference.b_T = b_T
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference

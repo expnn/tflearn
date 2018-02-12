@@ -2,7 +2,7 @@ from __future__ import division, print_function, absolute_import
 
 import tensorflow as tf
 import numpy as np
-
+from ..collections import CollectionKeys
 from ..helpers.trainer import Trainer
 from ..helpers.evaluator import Evaluator
 from ..utils import feed_dict_builder, is_none, get_tensor_parents_placeholders
@@ -53,7 +53,7 @@ class DNN(object):
                  best_val_accuracy=0.0):
         assert isinstance(network, tf.Tensor), "'network' arg is not a Tensor!"
         self.net = network
-        self.train_ops = tf.get_collection(tf.GraphKeys.TRAIN_OPS)
+        self.train_ops = tf.get_collection(CollectionKeys.TRAIN_OPS)
         self.trainer = Trainer(self.train_ops,
                                clip_gradients=clip_gradients,
                                tensorboard_dir=tensorboard_dir,
@@ -65,26 +65,26 @@ class DNN(object):
                                best_val_accuracy=best_val_accuracy)
         self.session = self.trainer.session
 
-        self.inputs = tf.get_collection(tf.GraphKeys.INPUTS)
+        self.inputs = tf.get_collection(CollectionKeys.INPUTS)
         if len(self.inputs) == 0:
             raise Exception("No input data! Please add an 'input_data' layer "
                             "to your model (or add your input data "
-                            "placeholder to tf.GraphKeys.INPUTS collection).")
+                            "placeholder to CollectionKeys.INPUTS collection).")
         # verif_inputs = get_tensor_parents_placeholders(network)
         # if len(self.inputs) != len(verif_inputs):
         #     print("WARNING: TFLearn detected " + str(len(verif_inputs)) +
         #           " input placeholders, but tf collection '" +
-        #           tf.GraphKeys.INPUTS + "' only contains " +
+        #           CollectionKeys.INPUTS + "' only contains " +
         #           str(len(self.inputs)) + ". If you define placeholders "
         #           "outside of TFLearn wrappers, make sure to add them to "
         #           "that collection.")
 
-        self.targets = tf.get_collection(tf.GraphKeys.TARGETS)
+        self.targets = tf.get_collection(CollectionKeys.TARGETS)
         # TODO: error tracking when targets are actually used
         # if len(self.targets) == 0:
         #     raise Exception("No target data! Please add a 'regression' layer "
         #                     "to your model (or add your target data "
-        #                     "placeholder to tf.GraphKeys.TARGETS collection).")
+        #                     "placeholder to CollectionKeys.TARGETS collection).")
         self.predictor = Evaluator([self.net],
                                    session=self.session)
 
@@ -142,14 +142,14 @@ class DNN(object):
                 every 'snapshot_step' steps.
             excl_trainops: `list` of `TrainOp`. A list of train ops to
                 exclude from training process (TrainOps can be retrieve
-                through `tf.get_collection_ref(tf.GraphKeys.TRAIN_OPS)`).
+                through `tf.get_collection_ref(CollectionKeys.TRAIN_OPS)`).
             run_id: `str`. Give a name for this run. (Useful for Tensorboard).
             callbacks: `Callback` or `list`. Custom callbacks to use in the
                 training life cycle
 
         """
         if len(self.train_ops) == 0:
-            raise Exception('tf collection "' + tf.GraphKeys.TRAIN_OPS + '" '
+            raise Exception('tf collection "' + CollectionKeys.TRAIN_OPS + '" '
                             'is empty! Please make sure you are using '
                             '`regression` layer in your network.')
 
@@ -193,8 +193,8 @@ class DNN(object):
                 val_feed_dicts = [val_feed_dict for i in self.train_ops]
         # Retrieve data preprocesing and augmentation
         dprep_dict, daug_dict = {}, {}
-        dprep_collection = tf.get_collection(tf.GraphKeys.DATA_PREP)
-        daug_collection = tf.get_collection(tf.GraphKeys.DATA_AUG)
+        dprep_collection = tf.get_collection(CollectionKeys.DATA_PREP)
+        daug_collection = tf.get_collection(CollectionKeys.DATA_AUG)
         for i in range(len(self.inputs)):
             # Support for custom inputs not using dprep/daug
             if len(dprep_collection) > i:
@@ -226,8 +226,8 @@ class DNN(object):
 
         # Retrieve data preprocesing and augmentation
         dprep_dict, daug_dict = {}, {}
-        dprep_collection = tf.get_collection(tf.GraphKeys.DATA_PREP)
-        daug_collection = tf.get_collection(tf.GraphKeys.DATA_AUG)
+        dprep_collection = tf.get_collection(CollectionKeys.DATA_PREP)
+        daug_collection = tf.get_collection(CollectionKeys.DATA_AUG)
         for i in range(len(self.inputs)):
             # Support for custom inputs not using dprep/daug
             if len(dprep_collection) > i:
@@ -310,7 +310,7 @@ class DNN(object):
         self.predictor = Evaluator([self.net],
                                    session=self.session,
                                    model=None)
-        for d in tf.get_collection(tf.GraphKeys.DATA_PREP):
+        for d in tf.get_collection(CollectionKeys.DATA_PREP):
             if d: d.restore_params(self.session)
 
     def get_weights(self, weight_tensor):

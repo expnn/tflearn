@@ -2,7 +2,7 @@
 from __future__ import division, print_function, absolute_import
 
 import tensorflow as tf
-
+from ..collections import CollectionKeys
 from ..layers import core
 from tflearn import utils
 from tflearn import objectives
@@ -26,12 +26,12 @@ def regression(incoming, placeholder='default', optimizer='adam',
     provided, to evaluate the model performance.
 
     A 'TrainOp' is generated, holding all information about the optimization
-    process. It is added to TensorFlow collection 'tf.GraphKeys.TRAIN_OPS'
+    process. It is added to TensorFlow collection 'CollectionKeys.TRAIN_OPS'
     and later used by TFLearn 'models' classes to perform the training.
 
     An optional placeholder 'placeholder' can be specified to use a custom
     TensorFlow target placeholder instead of creating a new one. The target
-    placeholder is added to the 'tf.GraphKeys.TARGETS' TensorFlow
+    placeholder is added to the 'CollectionKeys.TARGETS' TensorFlow
     collection, so that it can be retrieved later. In case no target is used,
     set the placeholder to None.
 
@@ -103,8 +103,8 @@ def regression(incoming, placeholder='default', optimizer='adam',
         placeholder = None
 
     if placeholder is not None:
-        if placeholder not in tf.get_collection(tf.GraphKeys.TARGETS):
-            tf.add_to_collection(tf.GraphKeys.TARGETS, placeholder)
+        if placeholder not in tf.get_collection(CollectionKeys.TARGETS):
+            tf.add_to_collection(CollectionKeys.TARGETS, placeholder)
 
     if to_one_hot:
         if n_classes is None:
@@ -137,7 +137,7 @@ def regression(incoming, placeholder='default', optimizer='adam',
     elif not isinstance(optimizer, tf.train.Optimizer):
         raise ValueError("Invalid Optimizer type.")
 
-    inputs = tf.get_collection(tf.GraphKeys.INPUTS)
+    inputs = tf.get_collection(CollectionKeys.INPUTS)
     #inputs = tf.concat(0, utils.get_tensor_parents_placeholders(incoming))
 
     # Building metric
@@ -189,8 +189,8 @@ def regression(incoming, placeholder='default', optimizer='adam',
         tr_vars = tf.trainable_variables()
 
     if not restore:
-        tf.add_to_collection(tf.GraphKeys.EXCL_RESTORE_VARS, 'moving_avg')
-        tf.add_to_collection(tf.GraphKeys.EXCL_RESTORE_VARS,
+        tf.add_to_collection(CollectionKeys.EXCL_RESTORE_VARS, 'moving_avg')
+        tf.add_to_collection(CollectionKeys.EXCL_RESTORE_VARS,
                              optimizer._name + '/')
 
     tr_op = TrainOp(loss=loss,
@@ -204,7 +204,7 @@ def regression(incoming, placeholder='default', optimizer='adam',
                     validation_batch_size=validation_batch_size,
                     name=op_name)
 
-    tf.add_to_collection(tf.GraphKeys.TRAIN_OPS, tr_op)
+    tf.add_to_collection(CollectionKeys.TRAIN_OPS, tr_op)
 
     if not hasattr(incoming, '__len__'):
         incoming.placeholder = placeholder

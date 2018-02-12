@@ -2,6 +2,7 @@
 from __future__ import division, print_function, absolute_import
 
 import tensorflow as tf
+from ..collections import CollectionKeys
 from tensorflow.python.training import moving_averages
 
 import tflearn
@@ -66,11 +67,11 @@ def batch_normalization(incoming, beta=0.0, gamma=1.0, epsilon=1e-5,
                             initializer=gamma_init, trainable=trainable,
                             restore=restore)
         # Track per layer variables
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, beta)
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, gamma)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, beta)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, gamma)
         if not restore:
-            tf.add_to_collection(tf.GraphKeys.EXCL_RESTORE_VARS, beta)
-            tf.add_to_collection(tf.GraphKeys.EXCL_RESTORE_VARS, gamma)
+            tf.add_to_collection(CollectionKeys.EXCL_RESTORE_VARS, beta)
+            tf.add_to_collection(CollectionKeys.EXCL_RESTORE_VARS, gamma)
 
         axis = list(range(input_ndim - 1))
 
@@ -112,7 +113,7 @@ def batch_normalization(incoming, beta=0.0, gamma=1.0, epsilon=1e-5,
     inference.gamma = gamma
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -148,7 +149,7 @@ def local_response_normalization(incoming, depth_radius=5, bias=1.0,
     inference.scope = scope
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 

@@ -26,7 +26,7 @@ import argparse
 import tflearn
 import tempfile
 import urllib
-
+from tflearn import CollectionKeys
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -119,7 +119,7 @@ class TFLearnWideAndDeep(object):
             central_bias = tflearn.variables.variable('central_bias', shape=[1],
                                                       initializer=tf.constant_initializer(np.random.randn()),
                                                       trainable=True, restore=True)
-            tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/cb_unit', central_bias)
+            tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/cb_unit', central_bias)
 
         if 'wide' in self.model_type:
             wide_network = self.wide_model(wide_inputs, n_cc)
@@ -216,7 +216,7 @@ class TFLearnWideAndDeep(object):
 
         if self.verbose:
             print ("Target variables:")
-            for v in tf.get_collection(tf.GraphKeys.TARGETS):
+            for v in tf.get_collection(CollectionKeys.TARGETS):
                 print ("  variable %s: %s" % (v.name, v))
 
             print ("="*77)

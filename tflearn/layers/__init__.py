@@ -12,3 +12,5 @@ from .recurrent import lstm, gru, simple_rnn, bidirectional_rnn, \
     BasicRNNCell, BasicLSTMCell, GRUCell
 from .embedding_ops import embedding
 from .merge_ops import merge, merge_outputs
+from .rnn import lstm as tf_lstm, gru as tf_gru, simple_rnn as tf_simple_rnn, rnn as tf_rnn, \
+    bidirectional_rnn as tf_bidirectional_rnn, coupled_input_forget_gate_lstm

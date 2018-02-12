@@ -2,6 +2,7 @@
 from __future__ import division, print_function, absolute_import
 
 import tensorflow as tf
+from ..collections import CollectionKeys
 
 
 def merge(tensors_list, mode, axis=1, name="Merge"):
@@ -76,7 +77,7 @@ def merge(tensors_list, mode, axis=1, name="Merge"):
             raise Exception("Unknown merge mode", str(mode))
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -104,6 +105,6 @@ def merge_outputs(tensor_list, name="MergeOutputs"):
         x = tf.concat(tensor_list, 1)
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, x)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, x)
 
     return x

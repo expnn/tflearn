@@ -124,7 +124,7 @@ class TestLayers(unittest.TestCase):
                                op_name="regression2",
                                name="Y")
 
-            self.assertEqual(len(tf.get_collection(tf.GraphKeys.TARGETS)), 1)
+            self.assertEqual(len(tf.get_collection(CollectionKeys.TARGETS)), 1)
 
     def test_feed_dict_no_None(self):
 

@@ -39,7 +39,7 @@ def init_graph(seed=None, log_device=False, num_cores=0, gpu_memory_fraction=0,
                             intra_op_parallelism_threads=num_cores,
                             gpu_options=gs,
                             allow_soft_placement=soft_placement)
-    tf.add_to_collection(tf.GraphKeys.GRAPH_CONFIG, config)
+    tf.add_to_collection(CollectionKeys.GRAPH_CONFIG, config)
 
     return config
 
@@ -132,6 +132,13 @@ def init_training_mode():
         b = tf.assign(tr_var, False)
         tf.add_to_collection('is_training_ops', a)
         tf.add_to_collection('is_training_ops', b)
+
+
+def init_logging(log_file=None):
+    if isinstance(log_file, (str, type(None))):
+        tf.add_to_collection(CollectionKeys.LOGFILE, log_file)
+    else:
+        raise ValueError('logging file name must be a string or None if do not log to file')
 
 
 _FLOATX = tf.float32
