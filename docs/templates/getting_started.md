@@ -184,7 +184,7 @@ fc_layer = tflearn.fully_connected(input_layer, 32)
 fc_layer = tflearn.fully_connected(input_layer, 32, restore='False')
 ```
 
-All weights that doesn't need to be restored will be added to tf.GraphKeys.EXCL_RESTORE_VARS collection, and when loading a pre-trained model, these variables restoration will simply be ignored.
+All weights that doesn't need to be restored will be added to CollectionKeys.EXCL_RESTORE_VARS collection, and when loading a pre-trained model, these variables restoration will simply be ignored.
 The following example shows how to fine-tune a network on a new task by restoring all weights except the last fully connected layer, and then train the new model on a new dataset:
 
 - Fine-tuning example: [finetuning.py](https://github.com/tflearn/tflearn/blob/master/examples/basics/finetuning.py).

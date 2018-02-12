@@ -2,7 +2,7 @@ from __future__ import division, print_function, absolute_import
 
 import tensorflow as tf
 from .utils import get_from_module
-
+from .collections import CollectionKeys
 
 def get(identifier):
     return get_from_module(identifier, globals(), 'optimizer')
@@ -131,7 +131,7 @@ class SGD(Optimizer):
                 self.learning_rate, step_tensor,
                 self.decay_step, self.lr_decay,
                 staircase=self.staircase)
-            tf.add_to_collection(tf.GraphKeys.LR_VARIABLES, self.learning_rate)
+            tf.add_to_collection(CollectionKeys.LR_VARIABLES, self.learning_rate)
         self.tensor = tf.train.GradientDescentOptimizer(
             learning_rate=self.learning_rate,
             use_locking=self.use_locking,
@@ -299,7 +299,7 @@ class Momentum(Optimizer):
                 self.learning_rate, step_tensor,
                 self.decay_step, self.lr_decay,
                 staircase=self.staircase)
-            tf.add_to_collection(tf.GraphKeys.LR_VARIABLES, self.learning_rate)
+            tf.add_to_collection(CollectionKeys.LR_VARIABLES, self.learning_rate)
         self.tensor = tf.train.MomentumOptimizer(
             learning_rate=self.learning_rate,
             momentum=self.momentum,
@@ -558,7 +558,7 @@ class Nesterov(Optimizer):
                 self.learning_rate, step_tensor,
                 self.decay_step, self.lr_decay,
                 staircase=self.staircase)
-            tf.add_to_collection(tf.GraphKeys.LR_VARIABLES, self.learning_rate)
+            tf.add_to_collection(CollectionKeys.LR_VARIABLES, self.learning_rate)
         self.tensor = tf.train.MomentumOptimizer(
             learning_rate=self.learning_rate,
             momentum=self.momentum,

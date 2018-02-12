@@ -2,6 +2,7 @@ from __future__ import division, print_function, absolute_import
 
 import numpy as np
 import tensorflow as tf
+from ..collections import CollectionKeys
 from tensorflow.python.framework import dtypes
 from tensorflow.python.ops import standard_ops
 
@@ -27,10 +28,10 @@ def input_data(shape=None, placeholder=None, dtype=tf.float32,
     exception will be raised.
 
     Furthermore, the placeholder is added to TensorFlow collections
-    so it can be retrieved using tf.get_collection(tf.GraphKeys.INPUTS)
-    as well as tf.GraphKeys.LAYER_TENSOR + '/' + name. Similarly for
+    so it can be retrieved using tf.get_collection(CollectionKeys.INPUTS)
+    as well as CollectionKeys.LAYER_TENSOR + '/' + name. Similarly for
     the data preprocessing and augmentation objects which are stored in
-    the collections with tf.GraphKeys.DATA_PREP and tf.GraphKeys.DATA_AUG.
+    the collections with CollectionKeys.DATA_PREP and CollectionKeys.DATA_AUG.
     This allows other parts of TFLearn to easily retrieve and use these
     objects by referencing these graph-keys.
 
@@ -82,13 +83,13 @@ def input_data(shape=None, placeholder=None, dtype=tf.float32,
 
     # Store the placeholder object in TensorFlow collections so it can be
     # retrieved and used elsewhere.
-    tf.add_to_collection(tf.GraphKeys.INPUTS, placeholder)
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, placeholder)
+    tf.add_to_collection(CollectionKeys.INPUTS, placeholder)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, placeholder)
 
     # Store the objects for data-preprocessing and -augmentation
     # in TensorFlow collections so they can be retrieved and used elsewhere.
-    tf.add_to_collection(tf.GraphKeys.DATA_PREP, data_preprocessing)
-    tf.add_to_collection(tf.GraphKeys.DATA_AUG, data_augmentation)
+    tf.add_to_collection(CollectionKeys.DATA_PREP, data_preprocessing)
+    tf.add_to_collection(CollectionKeys.DATA_AUG, data_augmentation)
 
     return placeholder
 
@@ -158,7 +159,7 @@ def fully_connected(incoming, n_units, activation='linear', bias=True,
         W = va.variable('W', shape=filter_size, regularizer=W_regul,
                         initializer=W_init, trainable=trainable,
                         restore=restore)
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
 
         b = None
         if bias:
@@ -171,7 +172,7 @@ def fully_connected(incoming, n_units, activation='linear', bias=True,
                 bias_init = initializations.get(bias_init)()
             b = va.variable('b', shape=b_shape, initializer=bias_init,
                             trainable=trainable, restore=restore)
-            tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b)
+            tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b)
 
         inference = incoming
         # If input is not 2d, flatten it.
@@ -197,7 +198,7 @@ def fully_connected(incoming, n_units, activation='linear', bias=True,
     inference.b = b
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -250,7 +251,7 @@ def dropout(incoming, keep_prob, noise_shape=None, name="Dropout"):
         inference = tf.cond(is_training, apply_dropout, lambda: inference)
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -299,7 +300,7 @@ def reshape(incoming, new_shape, name="Reshape"):
     inference.scope = scope
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -325,7 +326,7 @@ def flatten(incoming, name="Flatten"):
     x = reshape(incoming, [-1, dims], name)
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, x)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, x)
 
     return x
 
@@ -352,7 +353,7 @@ def activation(incoming, activation='linear', name='activation'):
         raise ValueError('Unknown activation type.')
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, x)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, x)
 
     return x
 
@@ -400,14 +401,14 @@ def single_unit(incoming, activation='linear', bias=True, trainable=True,
         W = va.variable('W', shape=[n_inputs],
                         initializer=tf.constant_initializer(np.random.randn()),
                         trainable=trainable, restore=restore)
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
 
         b = None
         if bias:
             b = va.variable('b', shape=[n_inputs],
                             initializer=tf.constant_initializer(np.random.randn()),
                             trainable=trainable, restore=restore)
-            tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b)
+            tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b)
 
         inference = incoming
         # If input is not 2d, flatten it.
@@ -433,7 +434,7 @@ def single_unit(incoming, activation='linear', bias=True, trainable=True,
     inference.b = b
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -507,24 +508,24 @@ def highway(incoming, n_units, activation='linear', transform_dropout=None,
         W = va.variable('W', shape=[n_inputs, n_units], regularizer=W_regul,
                         initializer=W_init, trainable=trainable,
                         restore=restore)
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
 
         if isinstance(bias_init, str):
             bias_init = initializations.get(bias_init)()
         b = va.variable('b', shape=[n_units], initializer=bias_init,
                         trainable=trainable, restore=restore)
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b)
 
         # Weight and bias for the transform gate
         W_T = va.variable('W_T', shape=[n_inputs, n_units],
                           regularizer=None, initializer=W_init,
                           trainable=trainable, restore=restore)
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W_T)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W_T)
 
         b_T = va.variable('b_T', shape=[n_units],
                           initializer=tf.constant_initializer(-1),
                           trainable=trainable, restore=restore)
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, b_T)
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, b_T)
 
         # If input is not 2d, flatten it.
         if len(input_shape) > 2:
@@ -556,7 +557,7 @@ def highway(incoming, n_units, activation='linear', transform_dropout=None,
     inference.b_t = b_T
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference
 
@@ -591,7 +592,7 @@ def one_hot_encoding(target, n_classes, on_value=1.0, off_value=0.0,
                                       off_value=off_value)
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, target)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, target)
 
     return target
 
@@ -672,8 +673,8 @@ def multi_target_data(name_list, shape, dtype=tf.float32):
     for i in range(len(name_list)):
         with tf.name_scope(name_list[i]):
             p = tf.placeholder(shape=shape, dtype=dtype, name='Y')
-        if p not in tf.get_collection(tf.GraphKeys.TARGETS):
-            tf.add_to_collection(tf.GraphKeys.TARGETS, p)
+        if p not in tf.get_collection(CollectionKeys.TARGETS):
+            tf.add_to_collection(CollectionKeys.TARGETS, p)
         placeholders.append(p)
 
     return tf.concat(placeholders, axis=0)

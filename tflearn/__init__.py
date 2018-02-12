@@ -1,5 +1,6 @@
 from __future__ import absolute_import
-
+# Collections
+from .collections import CollectionKeys
 # Config
 from . import config
 from .config import is_training, get_training_mode, init_graph
@@ -28,7 +29,6 @@ from . import optimizers
 from . import summaries
 from . import optimizers
 from . import variables
-from . import collections # Add TFLearn collections to Tensorflow GraphKeys
 
 # Direct ops inclusion
 from .optimizers import SGD, AdaGrad, Adam, RMSProp, Momentum, Ftrl, AdaDelta, \

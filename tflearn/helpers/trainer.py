@@ -5,6 +5,7 @@ import re
 import os
 import numpy as np
 import tensorflow as tf
+from ..collections import CollectionKeys
 from tensorflow.python.training import optimizer as tf_optimizer
 
 import tflearn
@@ -107,7 +108,7 @@ class Trainer(object):
             self.best_checkpoint_path = best_checkpoint_path
 
             config = None
-            tflearn_conf = tf.get_collection(tf.GraphKeys.GRAPH_CONFIG)
+            tflearn_conf = tf.get_collection(CollectionKeys.GRAPH_CONFIG)
             if tflearn_conf:
                 config = tflearn_conf[0]
 
@@ -137,7 +138,7 @@ class Trainer(object):
                 allow_empty=True)
             # Saver for restoring a model (With exclude variable list)
             all_vars = variables.get_all_variables()
-            excl_vars = tf.get_collection(tf.GraphKeys.EXCL_RESTORE_VARS)
+            excl_vars = tf.get_collection(CollectionKeys.EXCL_RESTORE_VARS)
             to_restore = [item for item in all_vars
                           if check_restore_tensor(item, excl_vars)]
             self.restorer = tf.train.Saver(
@@ -444,7 +445,7 @@ class Trainer(object):
         if create_new_session:
             self.close_session()
             config = None
-            tflearn_conf = tf.get_collection(tf.GraphKeys.GRAPH_CONFIG)
+            tflearn_conf = tf.get_collection(CollectionKeys.GRAPH_CONFIG)
             if tflearn_conf:
                 config = tflearn_conf[0]
             self.session = tf.Session(config=config)

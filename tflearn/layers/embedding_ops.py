@@ -3,14 +3,14 @@ from __future__ import division, print_function, absolute_import
 
 import numpy as np
 import tensorflow as tf
-
+from ..collections import CollectionKeys
 from .recurrent import retrieve_seq_length_op
 from .. import variables as vs
 from .. import utils
 from .. import initializations
 
 
-def embedding(incoming, input_dim, output_dim, validate_indices=False,
+def embedding(incoming, lengths, input_dim, output_dim, validate_indices=False,
               weights_init='truncated_normal', trainable=True, restore=True,
               reuse=False, scope=None, name="Embedding"):
     """ Embedding.
@@ -18,13 +18,17 @@ def embedding(incoming, input_dim, output_dim, validate_indices=False,
     Embedding layer for a sequence of integer ids or floats.
 
     Input:
-        2-D Tensor [samples, ids].
+        2-D Tensor [samples, ids]. Each line is a sequence represented by its tokens' indexes
+        1-D Tensor [samples] or None. The true lengths of each sequences or inferred from `incoming`.
 
     Output:
         3-D Tensor [samples, embedded_ids, features].
 
     Arguments:
         incoming: Incoming 2-D Tensor.
+        lengths: The true lengths of the incoming tensor represented sequences.
+                 if `None` is specified, then it is assumes that the lengths are the maximum length,
+                 i.e., tf.shape(incoming)[2]
         input_dim: list of `int`. Vocabulary size (number of ids).
         output_dim: list of `int`. Embedding size.
         validate_indices: `bool`. Whether or not to validate gather indices.
@@ -44,6 +48,7 @@ def embedding(incoming, input_dim, output_dim, validate_indices=False,
 
     input_shape = utils.get_incoming_shape(incoming)
     assert len(input_shape) == 2, "Incoming Tensor shape must be 2-D"
+    assert lengths is None or len(utils.get_incoming_shape(lengths)) == 1, "sequence lengths must be 1-D"
 
     W_init = weights_init
     if isinstance(weights_init, str):
@@ -56,7 +61,7 @@ def embedding(incoming, input_dim, output_dim, validate_indices=False,
             W = vs.variable("W", shape=[input_dim, output_dim],
                             initializer=W_init, trainable=trainable,
                             restore=restore)
-            tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + name, W)
+            tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + name, W)
 
         inference = tf.cast(incoming, tf.int32)
         inference = tf.nn.embedding_lookup(W, inference,
@@ -64,12 +69,9 @@ def embedding(incoming, input_dim, output_dim, validate_indices=False,
 
     inference.W = W
     inference.scope = scope
-    # Embedding doesn't support masking, so we save sequence length prior
-    # to the lookup. Expand dim to 3d.
-    shape = [-1] + inference.get_shape().as_list()[1:3] + [1]
-    inference.seq_length = retrieve_seq_length_op(tf.reshape(incoming, shape))
+    inference.seq_length = lengths
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, inference)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, inference)
 
     return inference

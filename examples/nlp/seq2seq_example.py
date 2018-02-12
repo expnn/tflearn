@@ -13,6 +13,7 @@ import json
 
 import numpy as np
 import tensorflow as tf
+from tflearn import CollectionKeys
 
 from tensorflow.contrib.legacy_seq2seq.python.ops import seq2seq
 from tensorflow.python.ops import rnn_cell
@@ -205,7 +206,7 @@ class TFLearnSeq2Seq(object):
         else:
             raise Exception('[TFLearnSeq2Seq] Unknown seq2seq model %s' % self.seq2seq_model)
             
-        tf.add_to_collection(tf.GraphKeys.LAYER_VARIABLES + '/' + "seq2seq_model", model_outputs)	# for TFLearn to know what to save and restore
+        tf.add_to_collection(CollectionKeys.LAYER_VARIABLES + '/' + "seq2seq_model", model_outputs)	# for TFLearn to know what to save and restore
 
         # model_outputs: list of the same length as decoder_inputs of 2D Tensors with shape [batch_size x output_size] containing the generated outputs.
         if self.verbose > 2: print ("model outputs: %s" % model_outputs)

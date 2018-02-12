@@ -52,7 +52,7 @@ class SequenceGenerator(object):
                  session=None):
         assert isinstance(network, tf.Tensor), "'network' arg is not a Tensor!"
         self.net = network
-        self.train_ops = tf.get_collection(tf.GraphKeys.TRAIN_OPS)
+        self.train_ops = tf.get_collection(CollectionKeys.TRAIN_OPS)
         self.trainer = Trainer(self.train_ops,
                                clip_gradients=clip_gradients,
                                tensorboard_dir=tensorboard_dir,
@@ -61,8 +61,8 @@ class SequenceGenerator(object):
                                max_checkpoints=max_checkpoints,
                                session=session)
         self.session = self.trainer.session
-        self.inputs = tf.get_collection(tf.GraphKeys.INPUTS)
-        self.targets = tf.get_collection(tf.GraphKeys.TARGETS)
+        self.inputs = tf.get_collection(CollectionKeys.INPUTS)
+        self.targets = tf.get_collection(CollectionKeys.TARGETS)
         self.predictor = Evaluator([self.net],
                                    session=self.session)
         self.dic = dictionary
@@ -120,7 +120,7 @@ class SequenceGenerator(object):
                 every 'snapshot_step' steps.
             excl_trainops: `list` of `TrainOp`. A list of train ops to
                 exclude from training process (TrainOps can be retrieve
-                through `tf.get_collection_ref(tf.GraphKeys.TRAIN_OPS)`).
+                through `tf.get_collection_ref(CollectionKeys.TRAIN_OPS)`).
             run_id: `str`. Give a name for this run. (Useful for Tensorboard).
 
         """
@@ -154,8 +154,8 @@ class SequenceGenerator(object):
 
         # Retrieve data preprocesing and augmentation
         dprep_dict, daug_dict = {}, {}
-        dprep_collection = tf.get_collection(tf.GraphKeys.DATA_PREP)
-        daug_collection = tf.get_collection(tf.GraphKeys.DATA_AUG)
+        dprep_collection = tf.get_collection(CollectionKeys.DATA_PREP)
+        daug_collection = tf.get_collection(CollectionKeys.DATA_AUG)
         for i in range(len(self.inputs)):
             if dprep_collection[i] is not None:
                 dprep_dict[self.inputs[i]] = dprep_collection[i]
@@ -268,7 +268,7 @@ class SequenceGenerator(object):
         self.predictor = Evaluator([self.net],
                                    session=self.session,
                                    model=None)
-        for d in tf.get_collection(tf.GraphKeys.DATA_PREP):
+        for d in tf.get_collection(CollectionKeys.DATA_PREP):
             if d: d.restore_params(self.session)
 
     def get_weights(self, weight_tensor):

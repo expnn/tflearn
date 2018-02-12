@@ -1,7 +1,7 @@
 from __future__ import division, print_function, absolute_import
 
 import tensorflow as tf
-
+from ..collections import CollectionKeys
 import tflearn
 from ..utils import to_list
 from .. import data_flow
@@ -26,8 +26,8 @@ class Evaluator(object):
         self.tensors = to_list(tensors)
         self.graph = self.tensors[0].graph
         self.model = model
-        self.dprep_collection = tf.get_collection(tf.GraphKeys.DATA_PREP)
-        self.inputs = tf.get_collection(tf.GraphKeys.INPUTS)
+        self.dprep_collection = tf.get_collection(CollectionKeys.DATA_PREP)
+        self.inputs = tf.get_collection(CollectionKeys.INPUTS)
 
         with self.graph.as_default():
             self.session = tf.Session()
@@ -94,10 +94,10 @@ class Evaluator(object):
         """
         tflearn.is_training(False, self.session)
         coord = tf.train.Coordinator()
-        inputs = tf.get_collection(tf.GraphKeys.INPUTS)
+        inputs = tf.get_collection(CollectionKeys.INPUTS)
         # Data Preprocessing
         dprep_dict = {}
-        dprep_collection = tf.get_collection(tf.GraphKeys.DATA_PREP)
+        dprep_collection = tf.get_collection(CollectionKeys.DATA_PREP)
         for i in range(len(inputs)):
             # Support for custom inputs not using dprep/daug
             if len(dprep_collection) > i:

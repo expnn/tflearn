@@ -4,6 +4,7 @@ from __future__ import division, print_function, absolute_import
 import logging
 import numpy as np
 import tensorflow as tf
+from ..collections import CollectionKeys
 from tensorflow.python.ops import array_ops
 try:
     from tensorflow.python.ops.rnn import rnn_cell_impl as _rnn_cell, dynamic_rnn as _drnn, static_rnn as _rnn, static_bidirectional_rnn as _brnn
@@ -69,7 +70,7 @@ def _rnn_template(incoming, cell, dropout=None, return_seq=False,
                               sequence_length=sequence_length)
 
         # Retrieve RNN Variables
-        c = tf.GraphKeys.LAYER_VARIABLES + '/' + scope.name
+        c = CollectionKeys.LAYER_VARIABLES + '/' + scope.name
         for v in [_cell.W, _cell.b]:
             if hasattr(v, "__len__"):
                 for var in v: tf.add_to_collection(c, var)
@@ -88,7 +89,7 @@ def _rnn_template(incoming, cell, dropout=None, return_seq=False,
         o = tf.stack(outputs, 1) if return_seq else outputs[-1]
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, o)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, o)
 
     return (o, state) if return_state else o
 
@@ -373,7 +374,7 @@ def bidirectional_rnn(incoming, rnncell_fw, rnncell_bw, return_seq=False,
             sequence_length=sequence_length,
             dtype=tf.float32)
 
-        c = tf.GraphKeys.LAYER_VARIABLES + '/' + scope.name
+        c = CollectionKeys.LAYER_VARIABLES + '/' + scope.name
         for v in [rnncell_fw.W, rnncell_fw.b, rnncell_bw.W, rnncell_bw.b]:
             if hasattr(v, "__len__"):
                 for var in v: tf.add_to_collection(c, var)
@@ -396,7 +397,7 @@ def bidirectional_rnn(incoming, rnncell_fw, rnncell_bw, return_seq=False,
     sbw = states_bw
 
     # Track output tensor.
-    tf.add_to_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name, o)
+    tf.add_to_collection(CollectionKeys.LAYER_TENSOR + '/' + name, o)
 
     return (o, sfw, sbw) if return_states else o
 

@@ -4,8 +4,12 @@ from __future__ import division, print_function, absolute_import
 import six
 import string
 import random
+import logging
+import os
+from .collections import CollectionKeys
 try:
     import h5py
+
     H5PY_SUPPORTED = True
 except Exception as e:
     print("hdf5 is not supported on this machine (please install/reinstall h5py for optimal experience)")
@@ -15,6 +19,36 @@ import tensorflow as tf
 from tensorflow.python import pywrap_tensorflow
 
 import tflearn.variables as vs
+
+
+def get_logger(logger_name):
+    log_file_c = tf.get_collection(CollectionKeys.LOGFILE)
+    log_file = log_file_c[0] if len(log_file_c) > 0 else None
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(logging.DEBUG)
+
+    file_handlers = []
+    for h in logger.handlers:
+        if isinstance(h, logging.FileHandler):
+            file_handlers.append(h)
+
+    if log_file is not None:
+        if not any(os.path.samefile(log_file, h.baseFilename) for h in file_handlers):
+            fh = logging.FileHandler(log_file)
+            fh.setLevel(logging.DEBUG)
+            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            fh.setFormatter(formatter)
+            logger.addHandler(fh)
+
+    if not any(map(lambda x: isinstance(x, logging.StreamHandler) and not isinstance(x, logging.FileHandler),
+                   logger.handlers)):
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+
+    return logger
 
 
 def get_from_module(identifier, module_params, module_name, instantiate=False, kwargs=None):
@@ -51,7 +85,7 @@ def get_layer_by_name(name_or_scope):
 
     """
     # Track output tensor.
-    c = tf.get_collection(tf.GraphKeys.LAYER_TENSOR + '/' + name_or_scope)
+    c = tf.get_collection(CollectionKeys.LAYER_TENSOR + '/' + name_or_scope)
     if len(c) == 0:
         raise Exception("No layer found for this name.")
     if len(c) > 1:
@@ -83,19 +117,17 @@ def get_tensor_parents_placeholders(tensor):
 
 def get_tensor_parents(tensor):
     """ Get all calculation and data parent tensors (Not read). """
-    parents_list = []
-    parents_list.append(tensor)
+    parents_list = [tensor]
     if tensor.op:
         for t in tensor.op.inputs:
-            if not 'read:0' in t.name:
+            if 'read:0' not in t.name:
                 parents_list += get_tensor_parents(t)
     return parents_list
 
 
 def get_all_tensor_parents(tensor):
     """ Get all parents tensors. """
-    parents_list = []
-    parents_list.append(tensor)
+    parents_list = [tensor]
     if tensor.op:
         for t in tensor.op.inputs:
             parents_list += get_tensor_parents(t)
@@ -116,8 +148,7 @@ def get_tensor_children_placeholders(tensor):
 
 def get_tensor_children(tensor):
     """ Get all calculation and data parent tensors (Not read). """
-    children_list = []
-    children_list.append(tensor)
+    children_list = [tensor]
     if tensor.op:
         for t in tensor.op.outputs:
             if not 'read:0' in t.name:
@@ -127,8 +158,7 @@ def get_tensor_children(tensor):
 
 def get_all_tensor_children(tensor):
     """ Get all parents tensors. """
-    children_list = []
-    children_list.append(tensor)
+    children_list = [tensor]
     if tensor.op:
         for t in tensor.op.outputs:
             children_list += get_all_tensor_children(t)
@@ -183,12 +213,12 @@ def del_duplicated(l):
         if e not in res:
             res.append(e)
     return res
-    #return list(np.unique(np.array(l)))
+    # return list(np.unique(np.array(l)))
 
 
 def make_batches(samples_size, batch_size):
-    nb_batch = int(np.ceil(samples_size/float(batch_size)))
-    return [(i*batch_size, min(samples_size, (i+1)*batch_size)) for i in range(0, nb_batch)]
+    nb_batch = int(np.ceil(samples_size / float(batch_size)))
+    return [(i * batch_size, min(samples_size, (i + 1) * batch_size)) for i in range(0, nb_batch)]
 
 
 def slice_array(X, start=None, stop=None):
@@ -380,8 +410,9 @@ def check_restore_tensor(tensor_to_check, exclvars):
             if exclvar.split(':')[0] in tensor_to_check.name:
                 return False
         elif exclvar.name.split(':')[0] in tensor_to_check.name:
-                return False
+            return False
     return True
+
 
 # ----------------------------
 # Parameter formatting helpers
@@ -407,7 +438,7 @@ def autoformat_kernel_2d(strides):
 # Auto format filter size
 # Output shape: (rows, cols, input_depth, out_depth)
 def autoformat_filter_conv2d(fsize, in_depth, out_depth):
-    if isinstance(fsize,int):
+    if isinstance(fsize, int):
         return [fsize, fsize, in_depth, out_depth]
     elif isinstance(fsize, (tuple, list, tf.TensorShape)):
         if len(fsize) == 2:
@@ -434,7 +465,7 @@ def autoformat_filter_conv3d(fsize, in_depth, out_depth):
         return [fsize, fsize, fsize, in_depth, out_depth]
     elif isinstance(fsize, (tuple, list, tf.TensorShape)):
         if len(fsize) == 3:
-            return [fsize[0], fsize[1],fsize[2], in_depth, out_depth]
+            return [fsize[0], fsize[1], fsize[2], in_depth, out_depth]
         else:
             raise Exception("filter length error: " + str(len(fsize))
                             + ", only a length of 3 is supported.")
@@ -448,7 +479,7 @@ def autoformat_stride_3d(strides):
         return [1, strides, strides, strides, 1]
     elif isinstance(strides, (tuple, list, tf.TensorShape)):
         if len(strides) == 3:
-            return [1, strides[0], strides[1],strides[2], 1]
+            return [1, strides[0], strides[1], strides[2], 1]
         elif len(strides) == 5:
             assert strides[0] == strides[4] == 1, "Must have strides[0] = strides[4] = 1"
             return [strides[0], strides[1], strides[2], strides[3], strides[4]]
@@ -489,10 +520,10 @@ def fix_saver(collection_lists=None):
         try:
             # Try latest api
             l = tf.get_collection_ref("summary_tags")
-            l4 = tf.get_collection_ref(tf.GraphKeys.GRAPH_CONFIG)
+            l4 = tf.get_collection_ref(CollectionKeys.GRAPH_CONFIG)
         except Exception:
             l = tf.get_collection("summary_tags")
-            l4 = tf.get_collection(tf.GraphKeys.GRAPH_CONFIG)
+            l4 = tf.get_collection(CollectionKeys.GRAPH_CONFIG)
         l_stags = list(l)
         l4_stags = list(l4)
         del l[:]
@@ -500,20 +531,20 @@ def fix_saver(collection_lists=None):
 
         try:
             # Try latest api
-            l1 = tf.get_collection_ref(tf.GraphKeys.DATA_PREP)
-            l2 = tf.get_collection_ref(tf.GraphKeys.DATA_AUG)
+            l1 = tf.get_collection_ref(CollectionKeys.DATA_PREP)
+            l2 = tf.get_collection_ref(CollectionKeys.DATA_AUG)
         except Exception:
-            l1 = tf.get_collection(tf.GraphKeys.DATA_PREP)
-            l2 = tf.get_collection(tf.GraphKeys.DATA_AUG)
+            l1 = tf.get_collection(CollectionKeys.DATA_PREP)
+            l2 = tf.get_collection(CollectionKeys.DATA_AUG)
         l1_dtags = list(l1)
         l2_dtags = list(l2)
         del l1[:]
         del l2[:]
 
-        try: # Do not save exclude variables
-            l3 = tf.get_collection_ref(tf.GraphKeys.EXCL_RESTORE_VARS)
+        try:  # Do not save exclude variables
+            l3 = tf.get_collection_ref(CollectionKeys.EXCL_RESTORE_VARS)
         except Exception:
-            l3 = tf.get_collection(tf.GraphKeys.EXCL_RESTORE_VARS)
+            l3 = tf.get_collection(CollectionKeys.EXCL_RESTORE_VARS)
         l3_tags = list(l3)
         del l3[:]
         return [l_stags, l1_dtags, l2_dtags, l3_tags, l4_stags]
@@ -522,13 +553,13 @@ def fix_saver(collection_lists=None):
         for t in collection_lists[0]:
             tf.add_to_collection("summary_tags", t)
         for t in collection_lists[4]:
-            tf.add_to_collection(tf.GraphKeys.GRAPH_CONFIG, t)
+            tf.add_to_collection(CollectionKeys.GRAPH_CONFIG, t)
         for t in collection_lists[1]:
-            tf.add_to_collection(tf.GraphKeys.DATA_PREP, t)
+            tf.add_to_collection(CollectionKeys.DATA_PREP, t)
         for t in collection_lists[2]:
-            tf.add_to_collection(tf.GraphKeys.DATA_AUG, t)
+            tf.add_to_collection(CollectionKeys.DATA_AUG, t)
         for t in collection_lists[3]:
-            tf.add_to_collection(tf.GraphKeys.EXCL_RESTORE_VARS, t)
+            tf.add_to_collection(CollectionKeys.EXCL_RESTORE_VARS, t)
 
 
 def validate_func(x, allow_none=True):
@@ -543,7 +574,7 @@ def validate_dim(x, max_dim=None, min_dim=None, var_name='var'):
     elif type(x) in [np.ndarray, np.array, list]:
         dim = np.ndim(x)
     else:
-        #TODO: check hdf5, panda
+        # TODO: check hdf5, panda
         return
     # Verify dimension conditions
     if max_dim == min_dim:
@@ -559,7 +590,6 @@ def validate_dim(x, max_dim=None, min_dim=None, var_name='var'):
 
 
 def prepare_X(X, target_ndim, max_dim=None, min_dim=None, debug_msg="Data"):
-
     # Validate the dimension
     validate_dim(X, max_dim, min_dim)
 
@@ -576,6 +606,5 @@ def prepare_X(X, target_ndim, max_dim=None, min_dim=None, debug_msg="Data"):
             try:
                 X = np.reshape(X, newshape=np.shape(X)[:-1])
             except Exception:
-                raise Exception(debug_msg +  " shape mismatch (too many dimensions).")
+                raise Exception(debug_msg + " shape mismatch (too many dimensions).")
     return X, X_ndim
-
