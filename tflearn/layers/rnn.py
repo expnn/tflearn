@@ -1,17 +1,4 @@
 # -*- coding: utf-8 -*-
-# ====================================================================================
-# Copyright (C) 2018, All rights reserved.
-#
-# 工程：tflearn
-# 文件: rnn.py
-# 创建者：陈云川/chenyunchuan
-# 创建时间：2018/2/10
-#
-# 描述: The purpose of this file is to ...
-# ====================================================================================
-
-
-# -*- coding: utf-8 -*-
 from __future__ import division, print_function, absolute_import
 from ..collections import CollectionKeys
 from ..utils import get_logger
