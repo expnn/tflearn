@@ -61,7 +61,6 @@ def _rnn_template(rnn_, rnn_kwargs, name, dropout, return_seq, return_state, reu
             rnn_kwargs['cell'] = DropoutWrapper(rnn_kwargs['cell'], in_keep_prob, out_keep_prob)
 
         rnn_kwargs['inputs'] = incoming
-        rnn_kwargs['scope'] = None
         outputs, state = rnn_(**rnn_kwargs)
 
         if isinstance(outputs, (tuple, list)):
